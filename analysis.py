@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.patches import Circle
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 import numpy as np
 from scipy import cluster
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -13,7 +14,7 @@ from scipy.stats import chi2_contingency, pearsonr
 from itertools import combinations
 import sys
 sys.path.append("lib")
-import myorngCA
+# import myorngCA
 
 
 def circleOfCorrelations(pc_infos, ebouli):
@@ -34,13 +35,16 @@ def circleOfCorrelations(pc_infos, ebouli):
 	plt.title("Circle of Correlations")
  
 def myScatter(df):
+	"""
+	散点图
+	"""
 	# http://stackoverflow.com/a/23010837/1565438
-	axs = pd.tools.plotting.scatter_matrix(df, diagonal='kde')
+	axs = pd.plotting.scatter_matrix(df, diagonal='kde')
 	for ax in axs[:,0]: # the left boundary
 		ax.grid('off', axis='both')
 		ax.set_ylabel(ax.get_ylabel(), rotation=0, labelpad=len(ax.get_ylabel())+40)
 		ax.set_yticks([])
- 
+
 	for ax in axs[-1,:]: # the lower boundary
 		ax.grid('off', axis='both')
 		ax.set_xlabel(ax.get_xlabel(), rotation=90)
@@ -48,6 +52,9 @@ def myScatter(df):
 	plt.show()
  
 def myPCA(df, clusters=None):
+	"""
+	画成分和属性相关圈和pca图
+	"""
 	# Normalize data
 	df_norm = (df - df.mean()) / df.std()
 	# PCA
@@ -101,6 +108,7 @@ def myHClust(df):
 
 def myCorrPlot(df):
 	"""
+	相关圈， 是把皮尔森相关系数用圈的不同颜色表示
 	Correlation plot ( ~ corrplot with R)
 	Forked from https://github.com/louridas/corrplot
 	"""
@@ -134,45 +142,39 @@ def myCorrPlot(df):
 	ytickslocs = np.arange(len(labels))
 	ax.set_yticks(ytickslocs)
 	ax.set_yticklabels(labels, fontsize='small')
-
+	plt.show()
 	return plt
 
 def myChiSquaredTest(df):
 	chi2, p, _, _ = chi2_contingency(df.values)
-	print "chi2 score:", chi2
-	print "pvalue:", p
-	if p < 0.05: return True
-	else: return False
+	print("chi2 score:",chi2)
+	print("pvalue:", p)
+	if p < 0.05:
+		return True
+	else:
+		return False
 
-def myAFC(df):
-	# http://orange.biolab.si/doc/modules/orngCA.htm
-	c = myorngCA.CA(df.values, labelR=df.index.tolist() , labelC=df.columns.tolist())
-	c.Biplot()
 
 
 if __name__ == '__main__':
-	pass
 
 	# # An example with IRIS dataset
-	# from sklearn import datasets
-	# iris = datasets.load_iris()
-	# df = pd.DataFrame(iris.data, columns=iris.feature_names)
-	# # Correspondence Analysis
-	# myAFC(df)
+	from sklearn import datasets
+	iris = datasets.load_iris()
+	df = pd.DataFrame(iris.data, columns=iris.feature_names)
 	# # Chi-Square test
 	# myChiSquaredTest(df)
 	# # Scatter Matrix of features
 	# myScatter(df)
 	# # Correlations plot
-	# # myCorrPlot(df)
+	# myCorrPlot(df)
 	# # PCA
-	# myPCA(df)
-	# # PCA with Kmeans projection
-	# myPCA(df, clusters=kmeans(df, 3))
-	# # Hierarchical Clustering
+	myPCA(df)
+	# # PCA和Kmeans的结合，就是PCA上的点是Kmeans已经进行了聚类的，然后好分颜色
+	# myPCA(df, clusters=myKmeans(df, 3))
+	# # Hierarchical Clustering, 层次聚类
 	# myHClust(df)
-	# # Correlation Plot
+	# # Correlation Plot, 相关圈
 	# plot = myCorrPlot(df)
-	# plot.show()
 
 
