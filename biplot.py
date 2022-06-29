@@ -49,5 +49,8 @@ def biplot(score,coeff,labels=None):
     plt.grid()
 
 #Call the function. Use only the 2 PCs.
-biplot(x_new[:,0:2],np.transpose(pca.components_[0:2, :]), labels=feature_names)
+score = x_new[:,0:2]  # [150,2], 降维后的主成分
+coeff_component_and_attribute = pca.components_[0:2, :]  # [2,4], 主成分和属性的系数
+coeff = np.transpose(coeff_component_and_attribute)  #shape: [4,2], 做下转置， 特征空间中的主轴，代表数据中最大方差的方向。相当于，居中输入数据的右侧奇异向量，与它的特征向量平行。这些成分按解释方差排序
+biplot(score,coeff, labels=feature_names)
 plt.show()
